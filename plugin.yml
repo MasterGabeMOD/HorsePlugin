@@ -1,0 +1,7 @@
+name: WitherHorse
+version: 1.2
+main: me.mastergabemod.witherhorse.HorsePlugin
+commands:
+  witherhorse:
+    description: Mount a horse.
+    usage: /witherhorse
