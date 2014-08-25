@@ -1,11 +1,14 @@
 package me.mastergabemod.witherhorse;
 
 import net.minecraft.server.v1_7_R4.EntityHorse;
+import net.minecraft.server.v1_7_R4.NBTTagCompound;
+import net.minecraft.server.v1_7_R4.WorldServer;
 
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.craftbukkit.v1_7_R4.CraftWorld;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Player;
@@ -49,13 +52,12 @@ public class HorseCommand
       Entity vehicle = player.getVehicle();
       player.leaveVehicle();
       vehicle.remove();
-      player.sendMessage("§b§lYou dismounted your horse.");
     } else if (player.hasPermission("horse.use")) {
       Location loc = player.getLocation();
-      net.minecraft.server.v1_7_R4.WorldServer ws = ((org.bukkit.craftbukkit.v1_7_R4.CraftWorld)loc.getWorld()).getHandle();
-      EntityHorse eh = new net.minecraft.server.v1_7_R4.EntityHorse(ws);
+      WorldServer ws = ((CraftWorld)loc.getWorld()).getHandle();
+      EntityHorse eh = new EntityHorse(ws);
       eh.setPositionRotation(loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
-      net.minecraft.server.v1_7_R4.NBTTagCompound compound = new net.minecraft.server.v1_7_R4.NBTTagCompound();
+      NBTTagCompound compound = new NBTTagCompound();
       eh.b(compound);
       compound.setBoolean("Saddle", true);
       eh.a(compound);
