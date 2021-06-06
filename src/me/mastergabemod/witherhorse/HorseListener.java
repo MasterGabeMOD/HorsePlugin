@@ -11,6 +11,8 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.spigotmc.event.entity.EntityDismountEvent;
 
+import java.util.Objects;
+
 public class HorseListener
   implements Listener
 {
@@ -28,8 +30,7 @@ public class HorseListener
     Entity horse = event.getDismounted();
     if (horse.hasMetadata("witherhorse")) {
       horse.remove();
-      if ((event.getEntity() instanceof Player)) {
-        Player player = (Player)event.getEntity();
+      if ((event.getEntity() instanceof Player player)) {
         player.sendMessage("§a§lYou dismounted your horse.");
       }
     }
@@ -47,15 +48,18 @@ public class HorseListener
     Player player = event.getPlayer();
     Location from = event.getFrom();
     Location to = event.getTo();
-    if ((player.isInsideVehicle()) && (
-      (!from.getWorld().equals(to.getWorld())) || (from.distance(to) > 4.0D))) {
-      Entity vehicle = player.getVehicle();
-      if (vehicle.hasMetadata("witherhorse")) {
-        event.setCancelled(true);
-        player.leaveVehicle();
-        player.teleport(to);
-        vehicle.teleport(to);
-        vehicle.setPassenger(player);
+    if ((player.isInsideVehicle())) {
+      assert to != null;
+      if ((!Objects.equals(from.getWorld(), to.getWorld())) || (from.distance(to) > 4.0D)) {
+        Entity vehicle = player.getVehicle();
+        assert vehicle != null;
+        if (vehicle.hasMetadata("witherhorse")) {
+          event.setCancelled(true);
+          player.leaveVehicle();
+          player.teleport(to);
+          vehicle.teleport(to);
+          vehicle.setPassenger(player);
+        }
       }
     }
   }

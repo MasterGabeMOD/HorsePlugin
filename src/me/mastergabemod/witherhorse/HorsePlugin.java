@@ -2,6 +2,7 @@ package me.mastergabemod.witherhorse;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -11,34 +12,28 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class HorsePlugin extends JavaPlugin
 {
-  private List<String> used = new ArrayList<String>();
+  private final List<String> used = new ArrayList<>();
   public int command_delay;
 
   public void onEnable()
   {
     PluginManager pm = getServer().getPluginManager();
     FileConfiguration config = getConfig();
-    config.addDefault("command-delay", Integer.valueOf(600));
+    config.addDefault("command-delay", 600);
     config.options().copyDefaults(true);
 
     this.command_delay = config.getInt("command-delay");
 
     pm.registerEvents(new HorseListener(), this);
-    getCommand("witherhorse").setExecutor(new HorseCommand(this));
+    Objects.requireNonNull(getCommand("witherhorse")).setExecutor(new HorseCommand(this));
   }
 
   public boolean canMount(Player player) {
     final String name = player.getName();
     if (!this.used.contains(name)) {
       this.used.add(name);
-      Bukkit.getScheduler().runTaskLater(this, new Runnable()
-      {
-        public void run()
-        {
-          HorsePlugin.this.used.remove(name);
-        }
-      }
-      , this.command_delay * 20);
+      Bukkit.getScheduler().runTaskLater(this, () -> HorsePlugin.this.used.remove(name)
+              , this.command_delay * 20L);
 
       return true;
     }
