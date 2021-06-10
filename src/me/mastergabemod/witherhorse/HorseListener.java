@@ -28,7 +28,7 @@ public class HorseListener
   public void onEntityDismount(EntityDismountEvent event)
   {
     Entity horse = event.getDismounted();
-    if (horse.hasMetadata("witherhorse")) {
+    if (horse.hasMetadata("horse")) {
       horse.remove();
       if ((event.getEntity() instanceof Player player)) {
         player.sendMessage("§a§lYou dismounted your horse.");
@@ -39,7 +39,7 @@ public class HorseListener
   @EventHandler(priority=EventPriority.LOWEST)
   public void onEntityDamage(EntityDamageEvent event) {
     Entity entity = event.getEntity();
-    if (entity.hasMetadata("witherhorse"))
+    if (entity.hasMetadata("horse"))
       event.setCancelled(true);
   }
 
@@ -53,7 +53,7 @@ public class HorseListener
       if ((!Objects.equals(from.getWorld(), to.getWorld())) || (from.distance(to) > 4.0D)) {
         Entity vehicle = player.getVehicle();
         assert vehicle != null;
-        if (vehicle.hasMetadata("witherhorse")) {
+        if (vehicle.hasMetadata("horse")) {
           event.setCancelled(true);
           player.leaveVehicle();
           player.teleport(to);

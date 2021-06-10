@@ -73,7 +73,7 @@ public class HorseCommand
       horse.setOwner(player);
       horse.setColor(color);
       horse.setPassenger(player);
-      horse.setMetadata("witherhorse", new FixedMetadataValue(this.plugin, Boolean.TRUE));
+      horse.setMetadata("horse", new FixedMetadataValue(this.plugin, Boolean.TRUE));
       player.sendMessage("§b§lYou have mounted a horse!");
     } else {
       player.sendMessage("§4You don't have permissions to run this command!");
