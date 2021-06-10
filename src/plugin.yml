@@ -1,0 +1,14 @@
+name: WitherHorse
+version: 1.3
+main: me.mastergabemod.witherhorse.HorsePlugin
+description: Spawn a horse on your location
+author: MasterGabeMOD
+authors:
+  - Akutasan
+
+commands:
+  witherhorse:
+    description: Mount a horse.
+permissions:
+  horse.use:
+    description: Use /witherhorse
