@@ -1,5 +1,5 @@
-name: WitherHorse
-version: 1.3
+name: ABMCHorse
+version: 1.4
 main: me.mastergabemod.horse.HorsePlugin
 description: Spawn a horse on your location
 author: MasterGabeMOD

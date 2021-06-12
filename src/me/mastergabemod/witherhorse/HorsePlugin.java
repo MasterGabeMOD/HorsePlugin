@@ -25,7 +25,7 @@ public class HorsePlugin extends JavaPlugin
     this.command_delay = config.getInt("command-delay");
 
     pm.registerEvents(new HorseListener(), this);
-    Objects.requireNonNull(getCommand("horse")).setExecutor(new HorseCommand(this));
+    Objects.requireNonNull(getCommand("witherhorse")).setExecutor(new HorseCommand(this));
   }
 
   public boolean canMount(Player player) {

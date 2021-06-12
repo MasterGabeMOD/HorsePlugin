@@ -30,11 +30,10 @@ public class HorseListener
     Entity horse = event.getDismounted();
     if (horse.hasMetadata("horse")) {
       horse.remove();
-      if ((event.getEntity() instanceof Player player)) {
-        player.sendMessage("§a§lYou dismounted your horse.");
       }
     }
-  }
+  
+  
 
   @EventHandler(priority=EventPriority.LOWEST)
   public void onEntityDamage(EntityDamageEvent event) {
