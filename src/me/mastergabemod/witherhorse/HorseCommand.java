@@ -1,85 +1,88 @@
 package me.mastergabemod.witherhorse;
 
-import net.minecraft.server.v1_16_R3.EntityHorse;
-import net.minecraft.server.v1_16_R3.EntityTypes;
-import net.minecraft.server.v1_16_R3.NBTTagCompound;
-import net.minecraft.server.v1_16_R3.WorldServer;
-
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
+import org.bukkit.entity.AbstractHorse;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Player;
-import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.vehicle.VehicleExitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 
-import java.util.Objects;
+public class HorseCommand implements CommandExecutor, Listener {
+    private final HorsePlugin plugin;
 
-public class HorseCommand
-  implements CommandExecutor
-{
-  private HorsePlugin plugin;
-
-  public HorseCommand(HorsePlugin plugin)
-  {
-    this.plugin = plugin;
-  }
-
-  public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args)
-  {
-    if (!(sender instanceof Player)) {
-      sender.sendMessage("");
-      return true;
+    public HorseCommand(HorsePlugin plugin) {
+        this.plugin = plugin;
     }
-    
-    Player player = (Player) sender;
 
-    Horse.Color color = Horse.Color.WHITE;
-    if (args.length > 0) {
-      try {
-        color = Horse.Color.valueOf(args[0].toUpperCase());
-      } catch (Exception e) {
-        StringBuilder builder = new StringBuilder();
-        for (Horse.Color c : Horse.Color.values()) {
-          builder.append(", ").append(c.toString().toLowerCase());
+    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        if (!(sender instanceof Player)) {
+            sender.sendMessage("");
+            return true;
         }
 
-        player.sendMessage("§4§lInvalid color! Valid colors are: §e"+builder.substring(2));
-        return false;
-      }
+        Player player = (Player) sender;
+        final Horse.Color color;
+        if (args.length > 0) {
+            try {
+                color = Horse.Color.valueOf(args[0].toUpperCase());
+            } catch (Exception e) {
+                player.sendMessage("§4Invalid color, valid colors:");
+                StringBuilder builder = new StringBuilder();
+                for (Horse.Color c : Horse.Color.values()) {
+                    builder.append(" ,").append(c.toString().toLowerCase());
+                }
+
+                player.sendMessage(builder.toString().substring(2));
+                return true;
+            }
+        } else {
+            color = Horse.Color.values()[(int) (Math.random() * Horse.Color.values().length)];
+        }
+
+        if (player.isInsideVehicle() && player.getVehicle() instanceof AbstractHorse) {
+            Entity vehicle = player.getVehicle();
+            player.leaveVehicle();
+            vehicle.remove();
+            player.sendMessage("§b§lYou dismounted your horse.");
+        } else if (player.hasPermission("horse.use")) {
+            Location loc = player.getLocation();
+            loc.setY(loc.getY() + 1);
+            AbstractHorse horse = (AbstractHorse) loc.getWorld().spawn(loc, Horse.class, spawnedHorse -> {
+                spawnedHorse.setColor(color);
+                spawnedHorse.setTamed(true);
+                spawnedHorse.setOwner(player);
+                spawnedHorse.getInventory().setSaddle(new ItemStack(Material.SADDLE));
+                spawnedHorse.setMetadata("horse", new FixedMetadataValue(plugin, true));
+                spawnedHorse.setJumpStrength(Math.random() * 1.5 + 0.5);
+                spawnedHorse.getAttribute(org.bukkit.attribute.Attribute.GENERIC_MOVEMENT_SPEED)
+                  .setBaseValue(Math.random() * 0.2 + 0.2);
+            });
+            player.sendMessage("§b§lYou have mounted a horse!");
+            horse.addPassenger(player);
+        } else {
+            player.sendMessage("§4You don't have permissions to run this command!");
+        }
+        return true;
     }
 
-    if (player.isInsideVehicle()) {
-      Entity vehicle = player.getVehicle();
-      player.leaveVehicle();
-      assert vehicle != null;
-      vehicle.remove();
-    } else if (player.hasPermission("horse.use")) {
-      Location loc = player.getLocation();
-
-      WorldServer ws = ((CraftWorld) Objects.requireNonNull(loc.getWorld())).getHandle();
-      EntityHorse h = new EntityHorse(EntityTypes.HORSE, ws);
-      h.setPositionRotation(loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
-      ws.addEntity(h, CreatureSpawnEvent.SpawnReason.CUSTOM);
-
-      Horse horse = (Horse) h.getBukkitEntity();
-      horse.getInventory().setSaddle(new ItemStack(Material.SADDLE));
-      horse.setTamed(true);
-      horse.setOwner(player);
-      horse.setColor(color);
-      horse.setPassenger(player);
-      horse.setMetadata("horse", new FixedMetadataValue(this.plugin, Boolean.TRUE));
-      player.sendMessage("§b§lYou have mounted a horse!");
-    } else {
-      player.sendMessage("§4You don't have permissions to run this command!");
+    @EventHandler
+    public void onPlayerDismount(VehicleExitEvent event) {
+        if (!(event.getExited() instanceof Player)) {
+            return;
+        }
+        Player player = (Player) event.getExited();
+        Entity vehicle = event.getVehicle();
+        if (vehicle instanceof AbstractHorse && vehicle.hasMetadata("horse") && vehicle.getPassengers().isEmpty()) {
+            vehicle.remove();
+            player.sendMessage("§b§lYou dismounted your horse.");
+        }
     }
-    return true;
-  }
 }
